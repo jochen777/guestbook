@@ -87,6 +87,13 @@
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
 
+    <dependency>
+      <groupId>de.cyclon-softworx</groupId>
+      <artifactId>jformchecker-integration</artifactId>
+      <version>0.1.13</version>
+    </dependency>
+
+
 	</dependencies>
 
 	<build>

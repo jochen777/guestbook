@@ -15,21 +15,27 @@
  */
 package guestbook;
 
-import javax.validation.Valid;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import de.jformchecker.AjaxUtils;
+import de.jformchecker.FormChecker;
+import de.jformchecker.FormCheckerConfig;
+import de.jformchecker.themes.BasicBootstrapFormBuilder;
 
 /**
  * A controller to handle web requests to manage {@link GuestbookEntry}s
@@ -44,7 +50,9 @@ class GuestbookController {
 	private static final String IS_AJAX_HEADER = "X-Requested-With=XMLHttpRequest";
 
 	private final Guestbook guestbook;
-
+	
+	private final FormcheckerConfig formcheckerConfig;
+	
 	/**
 	 * Creates a new {@link GuestbookController} using the given {@link Guestbook}. The {@link Autowired} causes the
 	 * Spring container to try to find a Spring bean of type {@link Guestbook} and use it to create an instance of
@@ -52,10 +60,11 @@ class GuestbookController {
 	 * 
 	 * @param guestbook must not be {@literal null}.
 	 */
-	public GuestbookController(Guestbook guestbook) {
-
+	public GuestbookController(Guestbook guestbook, FormcheckerConfig formcheckerConfig) {
+		
 		Assert.notNull(guestbook, "Guestbook must not be null!");
 		this.guestbook = guestbook;
+		this.formcheckerConfig = formcheckerConfig;
 	}
 
 	/**
@@ -76,10 +85,13 @@ class GuestbookController {
 	 * @return
 	 */
 	@GetMapping(path = "/guestbook")
-	String guestBook(Model model, GuestbookForm form) {
+	String guestBook(Model model, @RequestParam Map<String, String> params) {
+
+		GuestbookForm form = formcheckerConfig.buildForm();
+		FormChecker fc = formcheckerConfig.runFc(params, form);
 
 		model.addAttribute("entries", guestbook.findAll());
-		model.addAttribute("form", form);
+		model.addAttribute("form", fc.getView().getForm());
 
 		return "guestbook";
 	}
@@ -97,15 +109,20 @@ class GuestbookController {
 	 * @return
 	 */
 	@PostMapping(path = "/guestbook")
-	String addEntry(@Valid GuestbookForm form, Errors errors, Model model) {
+	String addEntry( @RequestParam Map<String, String> params, Model model) {
 
-		if (errors.hasErrors()) {
-			return guestBook(model, form);
+		GuestbookForm form = formcheckerConfig.buildForm();
+		FormChecker fc = formcheckerConfig.runFc(params, form);
+		
+		if (!fc.isValidAndNotFirstRun()) {
+			return guestBook(model, params);
 		}
 
 		guestbook.save(form.toNewEntry());
 		return "redirect:/guestbook";
 	}
+
+
 
 	/**
 	 * Handles AJAX requests to create a new {@link GuestbookEntry}.
@@ -117,8 +134,16 @@ class GuestbookController {
 	 * @see #addEntry(String, String)
 	 */
 	@PostMapping(path = "/guestbook", headers = IS_AJAX_HEADER)
-	String addEntry(@Valid GuestbookForm form, Model model) {
+	String addEntryAjax(@RequestParam Map<String, String> params, Model model) {
 
+		GuestbookForm form = formcheckerConfig.buildForm();
+		FormChecker fc = formcheckerConfig.runFc(params, form);
+		
+		if (!fc.isValidAndNotFirstRun()) {
+			return AjaxUtils.getJsonOutput(fc);
+		}
+
+		
 		model.addAttribute("entry", guestbook.save(form.toNewEntry()));
 		model.addAttribute("index", guestbook.count());
 		return "guestbook :: entry";
@@ -154,4 +179,6 @@ class GuestbookController {
 
 		}).orElse(ResponseEntity.notFound().build());
 	}
+	
+	
 }

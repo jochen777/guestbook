@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	'use strict';
 
-	$('#form').submit(function(e) {
+	$('#form-id').submit(function(e) {
 
 		if(!$('#use_ajax').is(':checked')) {
 			return;
@@ -27,7 +27,11 @@ $(document).ready(function() {
 				$('html, body').animate({scrollTop: form.offset().top}, 2000);
 
 				e.target.reset();
+			},
+			error: function (data) {
+				alert("Problem!")
 			}
+		  
 		});
 	});
 

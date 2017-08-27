@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,8 +48,9 @@ public class GuestbookControllerUnitTests {
 		Model model = new ExtendedModelMap();
 		GuestbookForm form = mock(GuestbookForm.class);
 
-		GuestbookController controller = new GuestbookController(guestbook);
-		String viewName = controller.guestBook(model, form);
+		GuestbookController controller = new GuestbookController(guestbook, null);
+		Map<String, String> params = new HashMap<>();
+		String viewName = controller.guestBook(model, params);
 
 		assertThat(viewName).isEqualTo("guestbook");
 		assertThat(model.asMap().get("entries")).isInstanceOf(Iterable.class);
