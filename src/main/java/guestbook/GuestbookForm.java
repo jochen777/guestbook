@@ -15,7 +15,13 @@
  */
 package guestbook;
 
+import javax.validation.constraints.Min;
+
 import org.hibernate.validator.constraints.NotBlank;
+
+import de.jformchecker.elements.Label;
+import de.jformchecker.fieldmarkers.LongText;
+
 
 /**
  * Interface to bind request payloads and make them available in the controller.
@@ -23,7 +29,7 @@ import org.hibernate.validator.constraints.NotBlank;
  * @author Oliver Gierke
  * @see GuestbookController#addEntry(GuestbookForm, org.springframework.validation.Errors, org.springframework.ui.Model)
  */
-interface GuestbookForm {
+public class GuestbookForm {
 
 	/**
 	 * Returns the value bound to the {@code name} attribute of the request.
@@ -31,7 +37,8 @@ interface GuestbookForm {
 	 * @return
 	 */
 	@NotBlank
-	String getName();
+	@Label(text="Name")
+	public String name;
 
 	/**
 	 * Returns the value bound to the {@code text} attribute of the request.
@@ -39,14 +46,70 @@ interface GuestbookForm {
 	 * @return
 	 */
 	@NotBlank
-	String getText();
+	@LongText
+	@Label(text="Text")
+	public String text;
+	
+//	@Min(18)
+//	@Label(text="Dein Alter")
+//	int age;
 
 	/**
 	 * Returns a new {@link GuestbookEntry} using the data submitted in the request.
 	 * 
 	 * @return
 	 */
-	default GuestbookEntry toNewEntry() {
-		return new GuestbookEntry(getName(), getText());
+	public GuestbookEntry toNewEntry() {
+		return new GuestbookEntry(name, text);
 	}
+
+	
+	
+	@Override
+	public String toString() {
+		return "Bean: " + name + " --  " + text;
+	}
+
+
+
+
+
+	public String getText() {
+		return text;
+	}
+
+
+
+	public void setText(String text) {
+		this.text = text;
+	}
+
+
+
+	public String getName() {
+		return name;
+	}
+
+
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+
+
+
+
+//	public int getAge() {
+//		return age;
+//	}
+//
+//
+//
+//	public void setAge(int age) {
+//		this.age = age;
+//	}
+
+
 }

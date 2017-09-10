@@ -15,21 +15,21 @@
  */
 package guestbook;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import de.jformchecker.AjaxUtils;
+import de.jformchecker.adapter.FCForm;
 
 /**
  * A controller to handle web requests to manage {@link GuestbookEntry}s
@@ -76,8 +76,7 @@ class GuestbookController {
 	 * @return
 	 */
 	@GetMapping(path = "/guestbook")
-	String guestBook(Model model, GuestbookForm form) {
-
+	 String guestBook(Model model, FCForm<GuestbookForm> form) {
 		model.addAttribute("entries", guestbook.findAll());
 		model.addAttribute("form", form);
 
@@ -97,13 +96,13 @@ class GuestbookController {
 	 * @return
 	 */
 	@PostMapping(path = "/guestbook")
-	String addEntry(@Valid GuestbookForm form, Errors errors, Model model) {
+	String addEntryPost(FCForm<GuestbookForm> form, Model model) {
 
-		if (errors.hasErrors()) {
+		if (!form.getFc().isOk()) {
 			return guestBook(model, form);
 		}
 
-		guestbook.save(form.toNewEntry());
+		guestbook.save(form.getModel().toNewEntry());
 		return "redirect:/guestbook";
 	}
 
@@ -117,10 +116,14 @@ class GuestbookController {
 	 * @see #addEntry(String, String)
 	 */
 	@PostMapping(path = "/guestbook", headers = IS_AJAX_HEADER)
-	String addEntry(@Valid GuestbookForm form, Model model) {
+	String addEntryAjax(FCForm<GuestbookForm> form, Model model) {
 
-		model.addAttribute("entry", guestbook.save(form.toNewEntry()));
-		model.addAttribute("index", guestbook.count());
+		if (form.getFc().isOk()) {
+			model.addAttribute("entry", guestbook.save(form.getModel().toNewEntry()));
+			model.addAttribute("index", guestbook.count());
+		} else {
+			return AjaxUtils.getJsonOutput(form.getFc().getFcInstance());
+		}
 		return "guestbook :: entry";
 	}
 

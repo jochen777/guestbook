@@ -15,8 +15,11 @@
  */
 package guestbook;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 
@@ -26,6 +29,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+
+import de.jformchecker.adapter.FCForm;
 
 /**
  * Unit tests for {@link GuestbookController}.
@@ -44,14 +49,17 @@ public class GuestbookControllerUnitTests {
 		doReturn(Arrays.asList(entry)).when(guestbook).findAll();
 
 		Model model = new ExtendedModelMap();
-		GuestbookForm form = mock(GuestbookForm.class);
+		GuestbookForm formBean = mock(GuestbookForm.class);
 
 		GuestbookController controller = new GuestbookController(guestbook);
+		FCForm<GuestbookForm> form = new FCForm<>();
+		form.setModel(formBean);
 		String viewName = controller.guestBook(model, form);
 
 		assertThat(viewName).isEqualTo("guestbook");
 		assertThat(model.asMap().get("entries")).isInstanceOf(Iterable.class);
-		assertThat(model.asMap().get("form")).isEqualTo(form);
+		FCForm<GuestbookForm> fromModel = (FCForm<GuestbookForm>)model.asMap().get("form");
+		assertThat(fromModel.getModel()).isEqualTo(form.getModel());
 
 		verify(guestbook, times(1)).findAll();
 	}
