@@ -15,11 +15,10 @@
  */
 package guestbook;
 
-import javax.validation.constraints.Min;
-
 import org.hibernate.validator.constraints.NotBlank;
 
 import de.jformchecker.elements.Label;
+import de.jformchecker.elements.LabelTranslationKey;
 import de.jformchecker.fieldmarkers.LongText;
 
 
@@ -37,7 +36,7 @@ public class GuestbookForm {
 	 * @return
 	 */
 	@NotBlank
-	@Label(text="Name")
+	@LabelTranslationKey("guestbook.form.name")
 	public String name;
 
 	/**
@@ -47,7 +46,7 @@ public class GuestbookForm {
 	 */
 	@NotBlank
 	@LongText
-	@Label(text="Text")
+	@LabelTranslationKey("guestbook.form.text")
 	public String text;
 	
 //	@Min(18)
