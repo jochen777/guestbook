@@ -17,7 +17,6 @@ package guestbook;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-import de.jformchecker.elements.Label;
 import de.jformchecker.elements.LabelTranslationKey;
 import de.jformchecker.fieldmarkers.LongText;
 
@@ -61,44 +60,27 @@ public class GuestbookForm {
 	public GuestbookEntry toNewEntry() {
 		return new GuestbookEntry(name, text);
 	}
-
-	
 	
 	@Override
 	public String toString() {
 		return "Bean: " + name + " --  " + text;
 	}
 
-
-
-
-
 	public String getText() {
 		return text;
 	}
-
-
 
 	public void setText(String text) {
 		this.text = text;
 	}
 
-
-
 	public String getName() {
 		return name;
 	}
 
-
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
-
-
-
-
 
 //	public int getAge() {
 //		return age;
